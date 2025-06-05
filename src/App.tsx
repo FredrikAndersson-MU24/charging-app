@@ -2,6 +2,8 @@ import {useState} from 'react'
 import './App.css'
 import api from "./api/charging-station.tsx";
 import PriceChart from "./components/PriceChart.tsx";
+import ConsumptionChart from "./components/ConsumptionChart.tsx";
+import ChargeComponent from "./components/ChargeComponent.tsx";
 
 
 interface Info {
@@ -16,11 +18,30 @@ function App() {
 
     const [info, setInfo] = useState<Info>();
     const [price, setPrice] = useState<Array<number>>([]);
+    const [dailyConsumption, setDailyConsumption] = useState<Array<number>>([]);
 
     const handleGetCharge = () => {
         api.get(`/info`)
             .then((response) => {
                 setInfo(response.data);
+                console.log(response.data);
+            })
+    }
+
+    const handleGetCharge = () => {
+        api.get(`/charge`)
+            .then((response) => {
+                setCharge(response.data);
+                console.log(response.headers.get);
+            }).catch (error=> {
+            console.log(error);
+        });
+    }
+
+    const handleGetDailyConsumption = () => {
+        api.get(`/baseload`)
+            .then((response) => {
+                setDailyConsumption(response.data);
                 console.log(response.data);
             })
     }
@@ -40,6 +61,10 @@ function App() {
             <p>{info ? info.battery_capacity_kWh : "No info"}</p>
             <button onClick={handleGetPrice}>Get Price</button>
             <PriceChart data={price}/>
+            <button onClick={handleGetDailyConsumption}>Get daily consumption</button>
+            <ConsumptionChart data={dailyConsumption}/>
+            <button onClick={handleStartCharge}>Start Charge</button>
+            <ChargeComponent data={charge}/>
         </>
     )
 }
