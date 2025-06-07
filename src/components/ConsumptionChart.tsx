@@ -1,7 +1,8 @@
 import Chart from "react-apexcharts";
 
-export default function ConsumptionChart(props) {
-    const series = [{ data: props.data }];
+export default function ConsumptionChart(props:  { data: number[]}) {
+    const consumption: number[] = props.data;
+    const series=  [{data: consumption}];
 
     const options = {
         dataLabels: { enabled: false },
