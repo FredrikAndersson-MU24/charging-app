@@ -16,6 +16,9 @@ interface Info {
 
 function App() {
     const [charge, setCharge] = useState<number>(0);
+    const [hour, setHour] = useState<number>(0);
+    const [minute, setMinute] = useState<number>(0);
+    const [load, setLoad] = useState<number>(0);
     const [info, setInfo] = useState<Info>();
     const [price, setPrice] = useState<Array<number>>([]);
     const [dailyConsumption, setDailyConsumption] = useState<Array<number>>([]);
@@ -217,8 +220,7 @@ function App() {
             <PriceChart data={price}/>
             <button onClick={handleGetDailyConsumption}>Get daily consumption</button>
             <ConsumptionChart data={dailyConsumption}/>
-            <button onClick={handleStartCharge}>Start Charge</button>
-            <ChargeComponent data={charge}/>
+
         </>
     )
 }
