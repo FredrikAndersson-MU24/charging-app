@@ -11,7 +11,7 @@ interface Info {
     sim_time_min: number;
     base_current_load: number;
     battery_capacity_kWh: number;
-    ev_battery_charge_start_stopp: number;
+    ev_battery_charge_start_stopp: boolean;
 }
 
 function App() {
