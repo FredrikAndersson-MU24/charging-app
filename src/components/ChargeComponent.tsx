@@ -1,50 +1,49 @@
 import Chart from "react-apexcharts";
 
-export default function ChargeComponent(props: { data: number }) {
-    const series = [props.data];
+export default function ChargeComponent(props: { data: number, charging: boolean }) {
+    const charge = Number(props.data.toFixed(0));
+    const series = [charge];
 
     const options = {
         plotOptions: {
             radialBar: {
+                endAngle: 135,
                 startAngle: -135,
-                endAngle: 225,
                 hollow: {
                     margin: 0,
-                    size: '70%',
-                    background: '#fff',
-                    image: undefined,
-                    imageOffsetX: 0,
-                    imageOffsetY: 0,
-                    position: 'front',
+                    size: '60%',
+                    background: "transparent",
                     dropShadow: {
                         enabled: true,
-                        top: 3,
+                        top: 5,
                         left: 0,
                         blur: 4,
                         opacity: 0.25
                     }
                 },
                 track: {
-                    background: '#f2f2f2',
+                    background: "#f2f2f2",
                 },
                 dataLabels: {
                     name: {
-                        show: false,
+                        show: true,
+                        offsetY: -30,
+                        fontSize: '2em',
+
                     },
                     value: {
-                        offsetY: 5,
-                        fontSize: '22px',
+                        offsetY: 25,
+                        fontSize: '4em',
                     }
                 }
             }
         },
-        labels: ['Percent'],
+        labels: ['Charge'],
     };
 
     return (
         <>
             <Chart options={options} series={series} type="radialBar"/>
-            <p>{props.data  } kWh</p>
         </>
     );
 }
