@@ -27,13 +27,13 @@ export default function ChargeComponent(props: { data: number, charging: boolean
                 dataLabels: {
                     name: {
                         show: true,
-                        offsetY: -30,
-                        fontSize: '2em',
+                        offsetY: -20,
+                        fontSize: '1.6em',
 
                     },
                     value: {
-                        offsetY: 25,
-                        fontSize: '4em',
+                        offsetY: 15,
+                        fontSize: '3em',
                     }
                 }
             }
