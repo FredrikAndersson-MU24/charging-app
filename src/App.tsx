@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react'
 import './App.css'
 import api from "./api/charging-station.tsx";
 import PriceChart from "./components/PriceChart.tsx";
@@ -25,7 +25,9 @@ function App() {
     const [charging, setCharging] = useState<boolean>(false);
     const [chargeBelow80, setChargeBelow80,] = useState<boolean>(false);
     const chargerLoad: number = 7.4;
-
+    const maxLoad: number = 11;
+    const [costOptimised, setCostOptimised] = useState<boolean>(false);
+    const [chargingHoursSorted, setchargingHoursSorted] = useState<Array<number>>([]);
     const checkTime = () => {
         api.get(`/info`)
             .then((response) => {
@@ -43,6 +45,37 @@ function App() {
             console.log(error);
         });
     }
+
+
+    const handleStartCharge = useCallback(() => {
+        api.post('/charge', {"charging": "on"}, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then((response) => {
+                console.log(response);
+                setCharging(true);
+                checkChargeTo100();
+            }).catch((error) => {
+            console.log(error);
+        })
+    }, [])
+
+    const handleStopCharge = useCallback(() => {
+        api.post('/charge', {"charging": "off"}, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then((response) => {
+                console.log(response);
+                setCharging(false);
+            }).catch((error) => {
+            console.log(error);
+        })
+        handleGetCharge();
+    }, [])
 
     const checkChargeTo80 = () => {
         api.get(`/charge`)
@@ -62,6 +95,46 @@ function App() {
             console.log(error);
         });
     }
+    const hourRef = useRef(hour);
+    const chargeRef = useRef(charge);
+    useEffect(() => {
+        hourRef.current = hour;
+        chargeRef.current = charge;
+    }, [hour, charge]);
+    const checkChargeTo80Optimised = useCallback((optHour: number[]) => {
+        api.get(`/charge`)
+            .then((response) => {
+                const currentCharge = response.data;
+                console.log(hourRef.current);
+
+                if (!optHour.includes(hourRef.current)) {
+                    handleStopCharge();
+                    console.log("Not optimal hour: " + hourRef.current);
+
+                }
+                if (currentCharge >= 80) {
+                    console.log("Charge reached or exceeded 80. Stopping charge");
+                    setCharge(currentCharge);
+                    setCostOptimised(false);
+                }
+                if (currentCharge < 79) {
+                    console.log('Current charge is ' + currentCharge + '. Charging...');
+                    if (optHour.includes(hourRef.current)) {
+                        handleStartCharge();
+                    }
+                    setTimeout(() => {
+                        checkChargeTo80Optimised(optHour);
+                    }, 250);
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, [handleStartCharge, handleStopCharge]);
+
+    useEffect(() => {
+        checkChargeTo80Optimised(chargingHoursSorted);
+    }, [checkChargeTo80Optimised, chargingHoursSorted]);
 
     const checkChargeTo100 = () => {
         api.get(`/charge`)
@@ -105,35 +178,35 @@ function App() {
 
     }
 
-    const handleStartCharge = () => {
-        api.post('/charge', {"charging": "on"}, {
-            headers: {
-                'Content-Type': 'application/json'
+    const handleScheduleChargingWhenLowestPrice = () => {
+        //Charging time from 20 to 80 % approx 4 hours
+        const priceMap: Map<number, number> = new Map();
+        for (let i = 0; i < price.length; i++) {
+            priceMap.set(i, price[i]);
+        }
+        //sort the map on price ascending
+        const priceMapSortedLowToHigh = new Map([...priceMap.entries()].sort((a, b) => a[1] - b[1]));
+        console.log(priceMapSortedLowToHigh);
+
+        const chargingHours: Array<number> = [];
+        priceMapSortedLowToHigh.forEach((key: number, value: number) => {
+            if (chargingHours.length < 4) {
+                if (dailyConsumption[value] + chargerLoad < maxLoad) {
+                    chargingHours.push(value);
+                }
             }
         })
-            .then((response) => {
-                console.log(response);
-                setCharging(true);
-                checkChargeTo100();
-            }).catch((error) => {
-            console.log(error);
-        })
+        const chargingHoursSorted: Array<number> = chargingHours.sort((a, b) => a - b);
+        setchargingHoursSorted(chargingHours.sort((a, b) => a - b));
+        setCostOptimised(true);
+        console.log(chargingHoursSorted.includes(hour));
+        checkChargeTo80Optimised(chargingHoursSorted);
+        if (chargingHoursSorted.includes(hour)) {
+            console.log("CHARGING");
+        }
+
     }
 
-    const handleStopCharge = () => {
-        api.post('/charge', {"charging": "off"}, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-            .then((response) => {
-                console.log(response);
-                setCharging(false);
-            }).catch((error) => {
-            console.log(error);
-        })
-        handleGetCharge();
-    }
 
     const handleGetInfo = () => {
         api.get(`/info`)
@@ -189,17 +262,21 @@ function App() {
 
     useEffect(() => {
         handleGetInfo();
+        handleGetPrice();
+        handleGetDailyConsumption();
         handleGetCharge();
         checkTime();
     }, []);
 
     return (
-        <><div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-            <h2 >{hour.toString().length == 2 ? hour : "0"+hour}:{minute.toString().length == 2 ? minute : "0" + minute}</h2>
-            <h2 >{load} kW</h2>
-            <h2 >{hour.toString().length == 2 ? hour : "0"+hour}:{minute.toString().length == 2 ? minute : "0" + minute}</h2>
+        <>
+            <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                <h2>{hour.toString().length == 2 ? hour : "0" + hour}:{minute.toString().length == 2 ? minute : "0" + minute}</h2>
+                <h2>{load} kW</h2>
+                <h2>{costOptimised ? "$ optimised" : ""}</h2>
+                <h2>{hour.toString().length == 2 ? hour : "0" + hour}:{minute.toString().length == 2 ? minute : "0" + minute}</h2>
 
-        </div>
+            </div>
             <ChargeComponent data={charge} charging={charging}/>
             <button onClick={handleStartCharge} style={{backgroundColor: (charging ? "lightgreen" : "lightgrey")}}>Start
                 Charge
@@ -208,6 +285,7 @@ function App() {
                 Charge to 80%
             </button>
             <button onClick={handleStopCharge}>Stop Charge</button>
+            <button onClick={handleScheduleChargingWhenLowestPrice}>Charge when lowest price</button>
 
             <button onClick={handleDischarge}>Discharge</button>
             <br/>
