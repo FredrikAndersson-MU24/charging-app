@@ -24,6 +24,7 @@ function App() {
     const [dailyConsumption, setDailyConsumption] = useState<Array<number>>([]);
     const [charging, setCharging] = useState<boolean>(false);
     const [chargeBelow80, setChargeBelow80,] = useState<boolean>(false);
+    const chargerLoad: number = 7.4;
 
     const checkTime = () => {
         api.get(`/info`)
@@ -37,7 +38,7 @@ function App() {
                     setHour(currentHour);
                     setMinute(currentMin);
                     setLoad(currentLoad);
-                }, 500)
+                }, 1000)
             }).catch(error => {
             console.log(error);
         });
@@ -128,10 +129,10 @@ function App() {
             .then((response) => {
                 console.log(response);
                 setCharging(false);
-                handleGetCharge();
             }).catch((error) => {
             console.log(error);
         })
+        handleGetCharge();
     }
 
     const handleGetInfo = () => {
@@ -189,12 +190,8 @@ function App() {
     useEffect(() => {
         handleGetInfo();
         handleGetCharge();
-
-    }, []);
-
-    useEffect(() => {
         checkTime();
-    }, [checkTime, info]);
+    }, []);
 
     return (
         <><div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
