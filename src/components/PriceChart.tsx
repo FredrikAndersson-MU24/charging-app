@@ -1,6 +1,6 @@
 import Chart from "react-apexcharts";
 
-export default function PriceChart(props) {
+export default function PriceChart(props:  { data: number[] }) {
     const series = [{ data: props.data }];
 
     const options = {
@@ -17,7 +17,7 @@ export default function PriceChart(props) {
         },
         yaxis: {
             title: {
-                text: 'öre/kWh'
+                text: 'Price (öre/kWh)'
             }
         },
     };
