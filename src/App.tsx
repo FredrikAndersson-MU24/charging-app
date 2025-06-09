@@ -30,11 +30,11 @@ function App() {
     const [abortCharge, setAbortCharge] = useState<boolean>(false);
     const [chargingHoursSorted, setChargingHoursSorted] = useState<Array<number>>([]);
     const pollingRate = 100;
-    const checkTime = () => {
+    const checkTimeAndLoad = () => {
         api.get(`/info`)
             .then((response) => {
                 setTimeout(() => {
-                    checkTime();
+                    checkTimeAndLoad();
                     setHour(response.data.sim_time_hour);
                     setMinute(response.data.sim_time_min);
                     setLoad(response.data.base_current_load);
@@ -298,7 +298,7 @@ function App() {
         handleGetPrice();
         handleGetDailyConsumption();
         handleGetCharge();
-        checkTime();
+        checkTimeAndLoad();
     }, []);
 
     return (
