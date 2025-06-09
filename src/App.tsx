@@ -298,8 +298,11 @@ function App() {
         handleGetPrice();
         handleGetDailyConsumption();
         handleGetCharge();
-        checkTimeAndLoad();
     }, []);
+
+    useEffect(() => {
+        checkTimeAndLoad();
+    });
 
     return (
         <>
