@@ -33,15 +33,11 @@ function App() {
     const checkTime = () => {
         api.get(`/info`)
             .then((response) => {
-                const responseData = response.data;
-                const currentHour: number = responseData.sim_time_hour;
-                const currentMin: number = responseData.sim_time_min;
-                const currentLoad: number = responseData.base_current_load;
                 setTimeout(() => {
                     checkTime();
-                    setHour(currentHour);
-                    setMinute(currentMin);
-                    setLoad(currentLoad);
+                    setHour(response.data.sim_time_hour);
+                    setMinute(response.data.sim_time_min);
+                    setLoad(response.data.base_current_load);
                 }, pollingRate)
             }).catch(error => {
             console.log(error);
@@ -55,7 +51,7 @@ function App() {
           //      'Content-Type': 'application/json'
          //   }
         })
-            .then((response) => {
+            .then(() => {
                 setCharging(true);
                 checkChargeTo100();
             }).catch((error) => {
