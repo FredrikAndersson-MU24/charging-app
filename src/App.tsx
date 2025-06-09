@@ -27,9 +27,9 @@ function App() {
     const chargerLoad: number = 7.4;
     const maxLoad: number = 11;
     const [costOptimised, setCostOptimised] = useState<boolean>(false);
-    const [chargingHoursSorted, setchargingHoursSorted] = useState<Array<number>>([]);
     const [abortCharge, setAbortCharge] = useState<boolean>(false);
     const [chargingHoursSorted, setChargingHoursSorted] = useState<Array<number>>([]);
+    const pollingRate = 100;
     const checkTime = () => {
         api.get(`/info`)
             .then((response) => {
@@ -42,7 +42,7 @@ function App() {
                     setHour(currentHour);
                     setMinute(currentMin);
                     setLoad(currentLoad);
-                }, 1000)
+                }, pollingRate)
             }).catch(error => {
             console.log(error);
         });
@@ -100,7 +100,7 @@ function App() {
                     setTimeout(() => {
                         checkChargeTo80();
                         setCharge(currentCharge);
-                    }, 100)
+                    }, pollingRate)
                 } else {
                     handleStopCharge();
                     console.log("Charge reached or exceeded 80. Stopping charge");
@@ -118,37 +118,6 @@ function App() {
     useEffect(() => {
         hourRef.current = hour;
         chargeRef.current = charge;
-    }, [hour, charge]);
-    const checkChargeTo80Optimised = useCallback((optHour: number[]) => {
-        api.get(`/charge`)
-            .then((response) => {
-                const currentCharge = response.data;
-                console.log(hourRef.current);
-
-                if (!optHour.includes(hourRef.current)) {
-                    handleStopCharge();
-                    console.log("Not optimal hour: " + hourRef.current);
-
-                }
-                if (currentCharge >= 80) {
-                    console.log("Charge reached or exceeded 80. Stopping charge");
-                    setCharge(currentCharge);
-                    setCostOptimised(false);
-                }
-                if (currentCharge < 79) {
-                    console.log('Current charge is ' + currentCharge + '. Charging...');
-                    if (optHour.includes(hourRef.current)) {
-                        handleStartCharge();
-                    }
-                    setTimeout(() => {
-                        checkChargeTo80Optimised(optHour);
-                    }, 250);
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }, [handleStartCharge, handleStopCharge]);
         optRef.current = chargingHoursSorted;
         chargingRef.current = charging;
         abortChargeRef.current = abortCharge;
@@ -181,6 +150,7 @@ function App() {
                         setTimeout(() => {
                             checkChargeTo80Optimised();
                             setCharge(currentCharge);
+                        }, pollingRate);
                     }
                 })
                 .catch((error) => {
@@ -191,15 +161,13 @@ function App() {
         }
     });
 
-    useEffect(() => {
-        checkChargeTo80Optimised(chargingHoursSorted);
-    }, [checkChargeTo80Optimised, chargingHoursSorted]);
     const handleAbortCharging = () => {
         setAbortCharge(true);
         handleStopCharge();
         setCharging(false);
         setCostOptimised(false);
         setTimeout(()=>        setAbortCharge(false)
+    , 1000)
         console.log("Charging aborted by user!");
     }
 
@@ -212,7 +180,7 @@ function App() {
                     setTimeout(() => {
                         checkChargeTo100();
                         setCharge(currentCharge);
-                    }, 100)
+                    }, pollingRate)
                 } else {
                     handleStopCharge();
                     console.log("Charge reached or exceeded 100. Stopping charge");
