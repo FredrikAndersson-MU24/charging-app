@@ -1,6 +1,7 @@
 import Chart from "react-apexcharts";
+import {memo} from "react";
 
-export default function ConsumptionChart(props:  { data: number[]}) {
+const ConsumptionChart = (props:  { data: number[]}) => {
     const consumption: number[] = props.data;
     const series=  [{data: consumption}];
 
@@ -29,3 +30,5 @@ export default function ConsumptionChart(props:  { data: number[]}) {
         </div>
     );
 }
+
+export default memo(ConsumptionChart);
