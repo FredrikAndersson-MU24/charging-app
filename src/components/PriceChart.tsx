@@ -1,6 +1,7 @@
+import { memo } from "react";
 import Chart from "react-apexcharts";
 
-export default function PriceChart(props:  { data: number[] }) {
+const PriceChart = (props:  { data: number[] })=> {
     const series = [{ data: props.data }];
 
     const options = {
@@ -28,3 +29,5 @@ export default function PriceChart(props:  { data: number[] }) {
         </div>
     );
 }
+
+export default memo(PriceChart)
