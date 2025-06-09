@@ -19,6 +19,7 @@ function App() {
     const [hour, setHour] = useState<number>(0);
     const [minute, setMinute] = useState<number>(0);
     const [load, setLoad] = useState<number>(0);
+    const [info, setInfo] = useState<Info>();
     const [price, setPrice] = useState<Array<number>>([]);
     const [dailyConsumption, setDailyConsumption] = useState<Array<number>>([]);
     const [charging, setCharging] = useState<boolean>(false);
@@ -239,6 +240,14 @@ function App() {
         }
     }
 
+
+    const handleGetInfo = () => {
+        api.get(`/info`)
+            .then((response) => {
+                setInfo(response.data);
+            })
+    }
+
     const handleGetCharge = () => {
         api.get(`/charge`)
             .then((response) => {
@@ -285,6 +294,7 @@ function App() {
     }
 
     useEffect(() => {
+        handleGetInfo();
         handleGetPrice();
         handleGetDailyConsumption();
         handleGetCharge();
