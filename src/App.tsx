@@ -224,11 +224,11 @@ function App() {
 
             const chargingHours: Array<number> = [];
             priceMapSortedLowToHigh.forEach((key: number, value: number) => {
-               // if (chargingHours.length < 4) {
+                if (chargingHours.length < 4) {
                     if (dailyConsumption[value] + chargerLoad < maxLoad) {
                         chargingHours.push(value);
                     }
-               // }
+                }
                 console.log("Charging hours: " + chargingHours);
             })
             const chargingHoursSorted1: Array<number> = chargingHours.sort((a, b) => a - b);
