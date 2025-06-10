@@ -77,6 +77,10 @@ function App() {
     }, [])
 
     const handleStopCharge = useCallback(() => {
+        if (chargingTimeoutIdRef.current) {
+            clearTimeout(chargingTimeoutIdRef.current);
+            chargingTimeoutIdRef.current = null;
+        }
         api.post('/charge', {"charging": "off"}, {
        //     headers: {
        //         'Content-Type': 'application/json'
@@ -96,10 +100,9 @@ function App() {
             .then((response) => {
                 const currentCharge: number = response.data;
                 if (currentCharge < 79) {
-                    setTimeout(() => {
-                        checkChargeTo80();
+                    chargingTimeoutIdRef.current = setTimeout(() => {                        checkChargeTo80();
                         setCharge(currentCharge);
-                    }, pollingRate)
+                    }, pollingRate) as unknown as number;
                 } else {
                     handleStopCharge();
                     console.log("Charge reached or exceeded 80. Stopping charge");
@@ -199,12 +202,17 @@ function App() {
 
     const handleAbortCharging = () => {
         setAbortCharge(true);
+        if (chargingTimeoutIdRef.current) {
+            clearTimeout(chargingTimeoutIdRef.current);
+            chargingTimeoutIdRef.current = null;
+        }
         handleStopCharge();
         setCharging(false);
         setCostOptimised(false);
-        setTimeout(()=>        setAbortCharge(false)
-    , 1000)
-        console.log("Charging aborted by user!");
+        setIsLoadOptimisedScheduled(false);
+        setTimeout(()=>        setAbortCharge( false)
+        , pollingRate + 50);
+        console.log("Charging aborted by user from handleAbortCharging!");
     }
 
 
@@ -213,10 +221,9 @@ function App() {
             .then((response) => {
                 const currentCharge: number = response.data;
                 if (currentCharge < 99) {
-                    setTimeout(() => {
-                        checkChargeTo100();
+                    chargingTimeoutIdRef.current = setTimeout(() => {                        checkChargeTo100();
                         setCharge(currentCharge);
-                    }, pollingRate)
+                    }, pollingRate) as unknown as number;
                 } else {
                     handleStopCharge();
                     console.log("Charge reached or exceeded 100. Stopping charge");
@@ -251,7 +258,7 @@ function App() {
     }
 
     const handleScheduleChargingWhenLowestPrice = () => {
-        setAbortCharge(false);
+        setAbortCharge(() => false);
         handleGetCharge();
         if (chargeBelow80) {
             //Charging time from 20 to 80 % approx 4 hours
