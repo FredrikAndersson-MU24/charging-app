@@ -23,7 +23,8 @@ function NavBar() {
                 height: "4em",
                 alignSelf: "center",
                 margin: "0",
-                backgroundColor: "lightblue",
+                backgroundColor: "#101a33",
+                boxShadow: "10px 10px -10px rgba(0, 0, 0, 0.8)",
             }}>
             <BottomNavigationAction onClick={() => navigate("/")} label="Charging" icon={<EvStation/>}/>
             <BottomNavigationAction  onClick={() => navigate("/price")} label="Price" icon={<Paid/>}/>

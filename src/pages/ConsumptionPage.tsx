@@ -1,13 +1,14 @@
-import {useEffect, useState} from 'react'
+import {memo, useEffect, useState} from 'react'
 import '../App.css'
 import api from "../api/charging-station.tsx";
 import ConsumptionChart from "../components/ConsumptionChart.tsx";
+import {
+    Refresh
+} from "@mui/icons-material";
 
-
-function App() {
+function ConsumptionPage() {
 
     const [dailyConsumption, setDailyConsumption] = useState<Array<number>>([]);
-
 
     const handleGetBaseLoad = () => {
         setDailyConsumption([]);
@@ -26,11 +27,12 @@ function App() {
 
     return (
         <>
-            <button onClick={handleGetBaseLoad}>Get daily consumption</button>
-            <ConsumptionChart data={dailyConsumption}/>
-
+            <div className={"chart-container"}>
+                <ConsumptionChart data={dailyConsumption}/>
+                <button onClick={handleGetBaseLoad} className={"refresh-button"}><Refresh/></button>
+            </div>
         </>
     )
 }
 
-export default App
+export default memo(ConsumptionPage)

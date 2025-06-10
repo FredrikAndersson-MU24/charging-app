@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import '../App.css'
 import api from "../api/charging-station.tsx";
 import PriceChart from "../components/PriceChart.tsx";
+import {Refresh} from "@mui/icons-material";
 
 function PricePage() {
     const [price, setPrice] = useState<Array<number>>([]);
@@ -23,10 +24,10 @@ function PricePage() {
 
     return (
         <>
-
-            <button onClick={handleGetPrice}>Get Price</button>
+        <div className={"chart-container"}>
             <PriceChart data={price}/>
-
+            <button onClick={handleGetPrice} className={"refresh-button"}><Refresh/></button>
+        </div>
 
         </>
     )

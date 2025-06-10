@@ -1,6 +1,6 @@
 import Chart from "react-apexcharts";
 
-export default function ChargeComponent(props: { data: number, charging: boolean }) {
+const ChargeComponent = (props: { data: number, charging: boolean })=> {
     const charge = Number(props.data.toFixed(0));
     const series = [charge];
 
@@ -12,28 +12,32 @@ export default function ChargeComponent(props: { data: number, charging: boolean
                 hollow: {
                     margin: 0,
                     size: '60%',
-                    background: "transparent",
+                    background: "opaque",
+                    backgroundColor: "#24292e",
                     dropShadow: {
                         enabled: true,
-                        top: 5,
+                        top: -15,
                         left: 0,
                         blur: 4,
-                        opacity: 0.25
+                        opacity: 0.4
                     }
                 },
                 track: {
                     background: "#f2f2f2",
+                    radius: 5,
                 },
                 dataLabels: {
                     name: {
                         show: true,
                         offsetY: -20,
                         fontSize: '1.6em',
+                        color: 'grey',
 
                     },
                     value: {
                         offsetY: 15,
-                        fontSize: '3em',
+                        fontSize: '2.4em',
+                        color: 'gray',
                     }
                 }
             }
@@ -43,7 +47,12 @@ export default function ChargeComponent(props: { data: number, charging: boolean
 
     return (
         <>
-            <Chart options={options} series={series} type="radialBar"/>
+            <div>
+                <Chart options={options} series={series} type="radialBar"/>
+            </div>
+
         </>
     );
 }
+
+export default ChargeComponent
