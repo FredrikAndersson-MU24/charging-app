@@ -24,6 +24,7 @@ function App() {
     const [dailyConsumption, setDailyConsumption] = useState<Array<number>>([]);
     const [charging, setCharging] = useState<boolean>(false);
     const [chargeBelow80, setChargeBelow80,] = useState<boolean>(false);
+    const [polling, setPolling,] = useState<boolean>(false);
     const chargerLoad: number = 7.4;
     const maxLoad: number = 11;
     const [costOptimised, setCostOptimised] = useState<boolean>(false);
@@ -43,6 +44,7 @@ function App() {
             console.log(error);
         });
     }
+    const pollTimeAndLoad = useCallback(() => {
 
 
     const handleStartChargeTo100 = (() => {
@@ -301,8 +303,12 @@ function App() {
     }, []);
 
     useEffect(() => {
-        checkTimeAndLoad();
-    });
+        if(!polling){
+            pollTimeAndLoad();
+            setPolling(true);
+            console.log("SETTING POLLING")
+        }
+    }, [polling, pollTimeAndLoad]);
 
     return (
         <>
