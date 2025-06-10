@@ -1,17 +1,8 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
-import './App.css'
-import api from "./api/charging-station.tsx";
-import PriceChart from "./components/PriceChart.tsx";
-import ConsumptionChart from "./components/ConsumptionChart.tsx";
-import ChargeComponent from "./components/ChargeComponent.tsx";
-import {
-    Route, Routes
-} from 'react-router-dom';
-import PricePage from "./pages/PricePage.tsx";
-import ConsumptionPage from "./pages/ConsumptionPage.tsx";
-import ChargingPage from "./pages/ChargingPage.tsx";
-import NavBar from "./components/NavBar.tsx";
-import Chips from "./components/Chips.tsx";
+import '../App.css'
+import api from "../api/charging-station.tsx";
+import ChargeComponent from "../components/ChargeComponent.tsx";
+import Chips from "../components/Chips.tsx";
 interface Info {
     sim_time_hour: number;
     sim_time_min: number;
@@ -20,7 +11,7 @@ interface Info {
     ev_battery_charge_start_stopp: boolean;
 }
 
-function App() {
+function ChargingPage() {
     const [charge, setCharge] = useState<number>(0);
     const [hour, setHour] = useState<number>(0);
     const [minute, setMinute] = useState<number>(0);
@@ -41,17 +32,17 @@ function App() {
     const chargingTimeoutIdRef = useRef<number | null>(null);
 
     const pollTimeAndLoad = useCallback(() => {
-            api.get(`/info`)
-                .then((response) => {
-                    setTimeout(() => {
-                        pollTimeAndLoad();
-                        setHour(response.data.sim_time_hour);
-                        setMinute(response.data.sim_time_min);
-                        setLoad(response.data.base_current_load);
-                    }, 100)
-                }).catch(error => {
-                console.log(error);
-            });
+        api.get(`/info`)
+            .then((response) => {
+                setTimeout(() => {
+                    pollTimeAndLoad();
+                    setHour(response.data.sim_time_hour);
+                    setMinute(response.data.sim_time_min);
+                    setLoad(response.data.base_current_load);
+                }, 100)
+            }).catch(error => {
+            console.log(error);
+        });
     },[])
 
     const handleStartChargeTo100 = (() => {
@@ -202,7 +193,7 @@ function App() {
         setIsIsCostOptimisedScheduled(false);
         setIsLoadOptimisedScheduled(false);
         setTimeout(()=>        setAbortCharge( false)
-        , pollingRate + 50);
+            , pollingRate + 50);
         console.log("Charging aborted by user, from handleAbortCharging!");
     }
 
@@ -300,7 +291,7 @@ function App() {
             .then((response) => {
                 setInfo(response.data);
             }).catch(error => {
-                console.log(error);
+            console.log(error);
         })
     }
 
@@ -334,7 +325,7 @@ function App() {
                 setDailyConsumption(response.data);
                 console.log("Baseload fetched from API");
             }).catch((error) => {
-                console.log(error);
+            console.log(error);
         })
     }
 
@@ -345,7 +336,7 @@ function App() {
                 setPrice(response.data);
                 console.log("Price fetched from API");
             }).catch((error) => {
-                console.log(error);
+            console.log(error);
         })
     }
 
@@ -366,23 +357,22 @@ function App() {
 
     return (
         <>
-            <div className="app-container">
-                <Chips
-                    power={(charging ? (dailyConsumption[currentHourRef.current] + chargerLoad).toFixed(2) : dailyConsumption[currentHourRef.current])}
-                    time={(hour.toString().length == 2 ? hour : "0" + hour)+":"+(minute.toString().length == 2 ? minute : "0" + minute)}
-                    isCostOptimisedScheduled={isCostOptimisedScheduled}
-                    isLoadOptimisedScheduled={isLoadOptimisedScheduled}/>
-                <div className="page-container">
-                    <Routes>
-                        <Route path="/" element={<ChargingPage/>}/>
-                        <Route path="/consumption" element={<ConsumptionPage/>}/>
-                        <Route path="/price" element={<PricePage/>}/>
-                    </Routes>
-                </div>
-                <NavBar/>
-            </div>
+            <ChargeComponent data={charge} charging={charging}/>
+            <button onClick={handleStartChargeTo100}
+                    style={{backgroundColor: (charging ? "lightgreen" : "lightgrey")}}>Start
+                Charge
+            </button>
+            <button onClick={handleChargeTo80} style={{backgroundColor: (charging ? "lightgreen" : "lightgrey")}}>Start
+                Charge to 80%
+            </button>
+            <button onClick={handleAbortCharging}>Stop Charge</button>
+            <button onClick={handleScheduleChargingWhenLowestPrice} style={{backgroundColor: (isCostOptimisedScheduled ? "lightgreen" : "lightgrey")}}>Charge when lowest price</button>
+            <button onClick={handleScheduleChargingWhenLowestLoad} style={{backgroundColor: (isLoadOptimisedScheduled ? "lightgreen" : "lightgrey")}}>Charge when lowest load</button>
+            <button onClick={handleDischarge}>Discharge</button>
+
+
         </>
     )
 }
 
-export default App
+export default ChargingPage
