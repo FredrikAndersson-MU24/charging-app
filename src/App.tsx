@@ -50,11 +50,7 @@ function App() {
 
 
     const handleStartChargeTo100 = (() => {
-        api.post('/charge', {"charging": "on"}, {
-          //  headers: {
-          //      'Content-Type': 'application/json'
-         //   }
-        })
+        api.post('/charge', {"charging": "on"})
             .then(() => {
                 setCharging(true);
                 checkChargeTo100();
@@ -64,11 +60,7 @@ function App() {
     })
 
     const handleStartCharge = useCallback(() => {
-        api.post('/charge', {"charging": "on"}, {
-         //   headers: {
-         //       'Content-Type': 'application/json'
-          //  }
-        })
+        api.post('/charge', {"charging": "on"})
             .then(() => {
                 console.log("LOG FROM HANDLESTARTCHARGE");
                 setCharging(true);
@@ -82,11 +74,7 @@ function App() {
             clearTimeout(chargingTimeoutIdRef.current);
             chargingTimeoutIdRef.current = null;
         }
-        api.post('/charge', {"charging": "off"}, {
-       //     headers: {
-       //         'Content-Type': 'application/json'
-       //     }
-        })
+        api.post('/charge', {"charging": "off"})
             .then(() => {
                 console.log("LOG FROM HANDLESTOPCHARGE");
                 setCharging(false);
@@ -333,11 +321,7 @@ function App() {
     }
 
     const handleDischarge = () => {
-        api.post('/discharge', {"discharging": "on"}, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
+        api.post('/discharge', {"discharging": "on"})
             .then((response) => {
                 console.log(response);
                 handleGetCharge();
