@@ -122,7 +122,7 @@ function App() {
     }, [hour, charge, chargingHoursSorted, charging,abortCharge]);
 
 
-    const checkChargeTo80Optimised = (() => {
+    const checkChargeTo80PriceOptimised = (() => {
         if(!abortChargeRef.current){
             api.get(`/charge`)
                 .then((response) => {
@@ -134,21 +134,58 @@ function App() {
                         setCostOptimised(false);
                         setCharging(false);
                     } else {
-                        if (!optRef.current.includes(hourRef.current) && chargingRef.current) {
+                        if (!optimalHourRef.current.includes(currentHourRef.current) && isChargingRef.current) {
                             handleStopCharge();
                             console.log("Not optimal hour. Charge stopped...");
-                        } else if (!optRef.current.includes(hourRef.current) && !chargingRef.current) {
+                        } else if (!optimalHourRef.current.includes(currentHourRef.current) && !isChargingRef.current) {
                             console.log("Not optimal hour. Waiting.... ")
-                        } else if (optRef.current.includes(hourRef.current) && chargingRef.current) {
-                            console.log("Optimal hour. Charging....");
-                        } else if (optRef.current.includes(hourRef.current) && !chargingRef.current) {
+                        } else if (optimalHourRef.current.includes(currentHourRef.current) && isChargingRef.current) {
+                            console.log("Optimal hour and charging already started. Charging....");
+                        } else if (optimalHourRef.current.includes(currentHourRef.current) && !isChargingRef.current) {
                             handleStartCharge();
                             console.log("Optimal hour started. Charging started....");
                         }
-                        setTimeout(() => {
-                            checkChargeTo80Optimised();
+                        chargingTimeoutIdRef.current = setTimeout(() => {
+                            checkChargeTo80PriceOptimised();
                             setCharge(currentCharge);
-                        }, pollingRate);
+                        }, pollingRate) as unknown as number;
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        } else {
+            console.log("Charging aborted by use from charge cycle!");
+        }
+    });
+
+    const checkChargeTo80LoadOptimised = (() => {
+        if(!abortChargeRef.current){
+            api.get(`/charge`)
+                .then((response) => {
+                    const currentCharge: number = response.data;
+                    if (currentCharge > 79) {
+                        handleStopCharge();
+                        console.log("Charge reached or exceeded 80. Stopping charge");
+                        setCharge(currentCharge);
+                        setIsLoadOptimisedScheduled(false);
+                        setCharging(false);
+                    } else {
+                        if (!optimalHourRef.current.includes(currentHourRef.current) && isChargingRef.current) {
+                            handleStopCharge();
+                            console.log("Not optimal hour. Charge stopped...");
+                        } else if (!optimalHourRef.current.includes(currentHourRef.current) && !isChargingRef.current) {
+                            console.log("Not optimal hour. Waiting.... ")
+                        } else if (optimalHourRef.current.includes(currentHourRef.current) && isChargingRef.current) {
+                            console.log("Optimal hour and charging already started. Charging....");
+                        } else if (optimalHourRef.current.includes(currentHourRef.current) && !isChargingRef.current) {
+                            handleStartCharge();
+                            console.log("Optimal hour started. Charging started....");
+                        }
+                        chargingTimeoutIdRef.current = setTimeout(() => {
+                            checkChargeTo80PriceOptimised();
+                            setCharge(currentCharge);
+                        }, pollingRate) as unknown as number;
                     }
                 })
                 .catch((error) => {
