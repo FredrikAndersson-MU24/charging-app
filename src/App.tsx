@@ -272,7 +272,7 @@ function App() {
             const chargingHoursSorted1: Array<number> = chargingHours.sort((a, b) => a - b);
             setChargingHoursSorted(chargingHoursSorted1);
             setCostOptimised(true);
-            checkChargeTo80Optimised();
+            checkChargeTo80LoadOptimised();
         } else {
             console.log("charge is already " + charge);
         }
