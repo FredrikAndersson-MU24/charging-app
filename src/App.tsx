@@ -291,6 +291,27 @@ function App() {
     }
 
 
+    const handleScheduleChargingWhenLowestLoad = () => {
+        setAbortCharge(() => false);
+        handleGetCharge();
+        if (chargeBelow80) {
+            //sort the map on price ascending
+            const chargingHours: Array<number> = [];
+            for(let i = 0; i < 4; i++){
+                if (dailyConsumption[i] + chargerLoad < maxLoad) {
+                    chargingHours.push(i);
+                }
+            }
+            console.log("Charging hours: " + chargingHours);
+            setChargingHoursSorted(chargingHours);
+            setIsLoadOptimisedScheduled(true);
+            checkChargeTo80PriceOptimised();
+        } else {
+            console.log("charge is already " + charge);
+        }
+    }
+
+
     const handleGetInfo = () => {
         api.get(`/info`)
             .then((response) => {
@@ -362,8 +383,9 @@ function App() {
         <>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
                 <h2>{hour.toString().length == 2 ? hour : "0" + hour}:{minute.toString().length == 2 ? minute : "0" + minute}</h2>
-                <h2>{load} kW</h2>
+                <h2>{(dailyConsumption[currentHourRef.current] + chargerLoad).toFixed(2)} kW</h2>
                 <h2 style={{backgroundColor: (costOptimised ? "lightgreen" : "lightgrey")}}>{costOptimised ? "$" : ""}</h2>
+                <h2 style={{backgroundColor: (isLoadOptimisedScheduled ? "lightgreen" : "lightgrey")}}>{isLoadOptimisedScheduled ? "P" : ""}</h2>
                 <h2>{hour.toString().length == 2 ? hour : "0" + hour}:{minute.toString().length == 2 ? minute : "0" + minute}</h2>
 
             </div>
@@ -376,7 +398,8 @@ function App() {
                 Charge to 80%
             </button>
             <button onClick={handleAbortCharging}>Stop Charge</button>
-            <button onClick={handleScheduleChargingWhenLowestPrice}>Charge when lowest price</button>
+            <button onClick={handleScheduleChargingWhenLowestPrice} style={{backgroundColor: (costOptimised ? "lightgreen" : "lightgrey")}}>Charge when lowest price</button>
+            <button onClick={handleScheduleChargingWhenLowestLoad} style={{backgroundColor: (isLoadOptimisedScheduled ? "lightgreen" : "lightgrey")}}>Charge when lowest load</button>
 
             <button onClick={handleDischarge}>Discharge</button>
             <br/>
