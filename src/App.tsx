@@ -31,21 +31,22 @@ function App() {
     const [isLoadOptimisedScheduled, setIsLoadOptimisedScheduled] = useState<boolean>(false);
     const [abortCharge, setAbortCharge] = useState<boolean>(false);
     const [chargingHoursSorted, setChargingHoursSorted] = useState<Array<number>>([]);
-    const pollingRate = 100;
-    const checkTimeAndLoad = () => {
-        api.get(`/info`)
-            .then((response) => {
-                setTimeout(() => {
-                    checkTimeAndLoad();
-                    setHour(response.data.sim_time_hour);
-                    setMinute(response.data.sim_time_min);
-                    setLoad(response.data.base_current_load);
-                }, pollingRate)
-            }).catch(error => {
-            console.log(error);
-        });
-    }
+    const pollingRate: number = 2000;
+    const chargingTimeoutIdRef = useRef<number | null>(null);
+
     const pollTimeAndLoad = useCallback(() => {
+            api.get(`/info`)
+                .then((response) => {
+                    setTimeout(() => {
+                        pollTimeAndLoad();
+                        setHour(response.data.sim_time_hour);
+                        setMinute(response.data.sim_time_min);
+                        setLoad(response.data.base_current_load);
+                    }, 100)
+                }).catch(error => {
+                console.log(error);
+            });
+    },[])
 
 
     const handleStartChargeTo100 = (() => {
