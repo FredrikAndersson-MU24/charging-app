@@ -5,7 +5,6 @@ import PriceChart from "./components/PriceChart.tsx";
 import ConsumptionChart from "./components/ConsumptionChart.tsx";
 import ChargeComponent from "./components/ChargeComponent.tsx";
 
-
 interface Info {
     sim_time_hour: number;
     sim_time_min: number;
@@ -24,33 +23,32 @@ function App() {
     const [dailyConsumption, setDailyConsumption] = useState<Array<number>>([]);
     const [charging, setCharging] = useState<boolean>(false);
     const [chargeBelow80, setChargeBelow80,] = useState<boolean>(false);
+    const [polling, setPolling,] = useState<boolean>(false);
     const chargerLoad: number = 7.4;
     const maxLoad: number = 11;
-    const [costOptimised, setCostOptimised] = useState<boolean>(false);
+    const [isCostOptimisedScheduled, setIsIsCostOptimisedScheduled] = useState<boolean>(false);
+    const [isLoadOptimisedScheduled, setIsLoadOptimisedScheduled] = useState<boolean>(false);
     const [abortCharge, setAbortCharge] = useState<boolean>(false);
     const [chargingHoursSorted, setChargingHoursSorted] = useState<Array<number>>([]);
-    const pollingRate = 100;
-    const checkTimeAndLoad = () => {
-        api.get(`/info`)
-            .then((response) => {
-                setTimeout(() => {
-                    checkTimeAndLoad();
-                    setHour(response.data.sim_time_hour);
-                    setMinute(response.data.sim_time_min);
-                    setLoad(response.data.base_current_load);
-                }, pollingRate)
-            }).catch(error => {
-            console.log(error);
-        });
-    }
+    const pollingRate: number = 2000;
+    const chargingTimeoutIdRef = useRef<number | null>(null);
 
+    const pollTimeAndLoad = useCallback(() => {
+            api.get(`/info`)
+                .then((response) => {
+                    setTimeout(() => {
+                        pollTimeAndLoad();
+                        setHour(response.data.sim_time_hour);
+                        setMinute(response.data.sim_time_min);
+                        setLoad(response.data.base_current_load);
+                    }, 100)
+                }).catch(error => {
+                console.log(error);
+            });
+    },[])
 
     const handleStartChargeTo100 = (() => {
-        api.post('/charge', {"charging": "on"}, {
-          //  headers: {
-          //      'Content-Type': 'application/json'
-         //   }
-        })
+        api.post('/charge', {"charging": "on"})
             .then(() => {
                 setCharging(true);
                 checkChargeTo100();
@@ -60,11 +58,7 @@ function App() {
     })
 
     const handleStartCharge = useCallback(() => {
-        api.post('/charge', {"charging": "on"}, {
-         //   headers: {
-         //       'Content-Type': 'application/json'
-          //  }
-        })
+        api.post('/charge', {"charging": "on"})
             .then(() => {
                 console.log("LOG FROM HANDLESTARTCHARGE");
                 setCharging(true);
@@ -74,11 +68,11 @@ function App() {
     }, [])
 
     const handleStopCharge = useCallback(() => {
-        api.post('/charge', {"charging": "off"}, {
-       //     headers: {
-       //         'Content-Type': 'application/json'
-       //     }
-        })
+        if (chargingTimeoutIdRef.current) {
+            clearTimeout(chargingTimeoutIdRef.current);
+            chargingTimeoutIdRef.current = null;
+        }
+        api.post('/charge', {"charging": "off"})
             .then(() => {
                 console.log("LOG FROM HANDLESTOPCHARGE");
                 setCharging(false);
@@ -93,10 +87,9 @@ function App() {
             .then((response) => {
                 const currentCharge: number = response.data;
                 if (currentCharge < 79) {
-                    setTimeout(() => {
-                        checkChargeTo80();
+                    chargingTimeoutIdRef.current = setTimeout(() => {                        checkChargeTo80();
                         setCharge(currentCharge);
-                    }, pollingRate)
+                    }, pollingRate) as unknown as number;
                 } else {
                     handleStopCharge();
                     console.log("Charge reached or exceeded 80. Stopping charge");
@@ -106,65 +99,104 @@ function App() {
             console.log(error);
         });
     }
-    const hourRef = useRef(hour);
+    const currentHourRef = useRef(hour);
     const chargeRef = useRef(charge);
-    const optRef = useRef(chargingHoursSorted);
-    const chargingRef = useRef(charging);
+    const optimalHourRef = useRef(chargingHoursSorted);
+    const isChargingRef = useRef(charging);
     const abortChargeRef = useRef(abortCharge);
+
     useEffect(() => {
-        hourRef.current = hour;
+        currentHourRef.current = hour;
         chargeRef.current = charge;
-        optRef.current = chargingHoursSorted;
-        chargingRef.current = charging;
+        optimalHourRef.current = chargingHoursSorted;
+        isChargingRef.current = charging;
         abortChargeRef.current = abortCharge;
-    }, [hour, charge, chargingHoursSorted, charging,abortCharge]);
+    }, [hour, charge, chargingHoursSorted, charging, abortCharge]);
 
 
-    const checkChargeTo80Optimised = (() => {
+    const checkChargeTo80PriceOptimised = (() => {
         if(!abortChargeRef.current){
             api.get(`/charge`)
                 .then((response) => {
                     const currentCharge: number = response.data;
                     if (currentCharge > 79) {
-                        handleStopCharge();
+                        handleAbortCharging();
                         console.log("Charge reached or exceeded 80. Stopping charge");
                         setCharge(currentCharge);
-                        setCostOptimised(false);
-                        setCharging(false);
                     } else {
-                        if (!optRef.current.includes(hourRef.current) && chargingRef.current) {
+                        if (!optimalHourRef.current.includes(currentHourRef.current) && isChargingRef.current) {
                             handleStopCharge();
                             console.log("Not optimal hour. Charge stopped...");
-                        } else if (!optRef.current.includes(hourRef.current) && !chargingRef.current) {
+                        } else if (!optimalHourRef.current.includes(currentHourRef.current) && !isChargingRef.current) {
                             console.log("Not optimal hour. Waiting.... ")
-                        } else if (optRef.current.includes(hourRef.current) && chargingRef.current) {
-                            console.log("Optimal hour. Charging....");
-                        } else if (optRef.current.includes(hourRef.current) && !chargingRef.current) {
+                        } else if (optimalHourRef.current.includes(currentHourRef.current) && isChargingRef.current) {
+                            console.log("Optimal hour and charging already started. Charging....");
+                        } else if (optimalHourRef.current.includes(currentHourRef.current) && !isChargingRef.current) {
                             handleStartCharge();
                             console.log("Optimal hour started. Charging started....");
                         }
-                        setTimeout(() => {
-                            checkChargeTo80Optimised();
+                        chargingTimeoutIdRef.current = setTimeout(() => {
+                            checkChargeTo80PriceOptimised();
                             setCharge(currentCharge);
-                        }, pollingRate);
+                        }, pollingRate) as unknown as number;
                     }
                 })
                 .catch((error) => {
                     console.log(error);
                 });
         } else {
-            console.log("Charging aborted by use from charge cycle!");
+            console.log("Charging aborted by user, from checkChargeTo80PriceOptimised!");
+        }
+    });
+
+    const checkChargeTo80LoadOptimised = (() => {
+        if(!abortChargeRef.current){
+            api.get(`/charge`)
+                .then((response) => {
+                    const currentCharge: number = response.data;
+                    if (currentCharge > 79) {
+                        handleAbortCharging();
+                        console.log("Charge reached or exceeded 80. Stopping charge");
+                        setCharge(currentCharge);
+                    } else {
+                        if (!optimalHourRef.current.includes(currentHourRef.current) && isChargingRef.current) {
+                            handleStopCharge();
+                            console.log("Not optimal hour. Charge stopped...");
+                        } else if (!optimalHourRef.current.includes(currentHourRef.current) && !isChargingRef.current) {
+                            console.log("Not optimal hour. Waiting.... ")
+                        } else if (optimalHourRef.current.includes(currentHourRef.current) && isChargingRef.current) {
+                            console.log("Optimal hour and charging already started. Charging....");
+                        } else if (optimalHourRef.current.includes(currentHourRef.current) && !isChargingRef.current) {
+                            handleStartCharge();
+                            console.log("Optimal hour started. Charging started....");
+                        }
+                        chargingTimeoutIdRef.current = setTimeout(() => {
+                            checkChargeTo80PriceOptimised();
+                            setCharge(currentCharge);
+                        }, pollingRate) as unknown as number;
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        } else {
+            console.log("Charging aborted by user, from checkChargeTo80LoadOptimised!");
         }
     });
 
     const handleAbortCharging = () => {
         setAbortCharge(true);
+        if (chargingTimeoutIdRef.current) {
+            clearTimeout(chargingTimeoutIdRef.current);
+            chargingTimeoutIdRef.current = null;
+        }
         handleStopCharge();
         setCharging(false);
-        setCostOptimised(false);
-        setTimeout(()=>        setAbortCharge(false)
-    , 1000)
-        console.log("Charging aborted by user!");
+        setIsIsCostOptimisedScheduled(false);
+        setIsLoadOptimisedScheduled(false);
+        setTimeout(()=>        setAbortCharge( false)
+        , pollingRate + 50);
+        console.log("Charging aborted by user, from handleAbortCharging!");
     }
 
 
@@ -173,10 +205,9 @@ function App() {
             .then((response) => {
                 const currentCharge: number = response.data;
                 if (currentCharge < 99) {
-                    setTimeout(() => {
-                        checkChargeTo100();
+                    chargingTimeoutIdRef.current = setTimeout(() => {                        checkChargeTo100();
                         setCharge(currentCharge);
-                    }, pollingRate)
+                    }, pollingRate) as unknown as number;
                 } else {
                     handleStopCharge();
                     console.log("Charge reached or exceeded 100. Stopping charge");
@@ -207,19 +238,16 @@ function App() {
         } else {
             console.log("charge is already " + charge);
         }
-
     }
 
     const handleScheduleChargingWhenLowestPrice = () => {
-        setAbortCharge(false);
+        setAbortCharge(() => false);
         handleGetCharge();
         if (chargeBelow80) {
-            //Charging time from 20 to 80 % approx 4 hours
             const priceMap: Map<number, number> = new Map();
             for (let i = 0; i < price.length; i++) {
                 priceMap.set(i, price[i]);
             }
-            //sort the map on price ascending
             const priceMapSortedLowToHigh = new Map([...priceMap.entries()].sort((a, b) => a[1] - b[1]));
 
             const chargingHours: Array<number> = [];
@@ -233,8 +261,27 @@ function App() {
             })
             const chargingHoursSorted1: Array<number> = chargingHours.sort((a, b) => a - b);
             setChargingHoursSorted(chargingHoursSorted1);
-            setCostOptimised(true);
-            checkChargeTo80Optimised();
+            setIsIsCostOptimisedScheduled(true);
+            checkChargeTo80LoadOptimised();
+        } else {
+            console.log("charge is already " + charge);
+        }
+    }
+
+    const handleScheduleChargingWhenLowestLoad = () => {
+        setAbortCharge(() => false);
+        handleGetCharge();
+        if (chargeBelow80) {
+            const chargingHours: Array<number> = [];
+            for(let i = 0; i < 4; i++){
+                if (dailyConsumption[i] + chargerLoad < maxLoad) {
+                    chargingHours.push(i);
+                }
+            }
+            console.log("Charging hours: " + chargingHours);
+            setChargingHoursSorted(chargingHours);
+            setIsLoadOptimisedScheduled(true);
+            checkChargeTo80PriceOptimised();
         } else {
             console.log("charge is already " + charge);
         }
@@ -245,7 +292,9 @@ function App() {
         api.get(`/info`)
             .then((response) => {
                 setInfo(response.data);
-            })
+            }).catch(error => {
+                console.log(error);
+        })
     }
 
     const handleGetCharge = () => {
@@ -253,35 +302,33 @@ function App() {
             .then((response) => {
                 console.log(response.data);
                 setCharge(response.data);
-                if (response.data < 80) {
+                if (response.data < 79) {
                     setChargeBelow80(true);
-                }
+                } else setChargeBelow80(false);
             }).catch(error => {
             console.log(error);
         });
     }
 
     const handleDischarge = () => {
-        api.post('/discharge', {"discharging": "on"}, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-            .then((response) => {
-                console.log(response);
+        api.post('/discharge', {"discharging": "on"})
+            .then(() => {
+                console.log("Discharge request sent to API");
                 handleGetCharge();
             }).catch((error) => {
             console.log(error);
         })
     }
 
-    const handleGetDailyConsumption = () => {
+    const handleGetBaseLoad = () => {
         setDailyConsumption([]);
         api.get(`/baseload`)
             .then((response) => {
                 setDailyConsumption(response.data);
-                console.log(response.data);
-            })
+                console.log("Baseload fetched from API");
+            }).catch((error) => {
+                console.log(error);
+        })
     }
 
     const handleGetPrice = () => {
@@ -289,24 +336,34 @@ function App() {
         api.get(`/priceperhour`)
             .then((response) => {
                 setPrice(response.data);
-                console.log(response.data);
-            })
+                console.log("Price fetched from API");
+            }).catch((error) => {
+                console.log(error);
+        })
     }
 
     useEffect(() => {
         handleGetInfo();
         handleGetPrice();
-        handleGetDailyConsumption();
+        handleGetBaseLoad();
         handleGetCharge();
-        checkTimeAndLoad();
     }, []);
+
+    useEffect(() => {
+        if(!polling){
+            pollTimeAndLoad();
+            setPolling(true);
+            console.log("SETTING POLLING")
+        }
+    }, [polling, pollTimeAndLoad]);
 
     return (
         <>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
                 <h2>{hour.toString().length == 2 ? hour : "0" + hour}:{minute.toString().length == 2 ? minute : "0" + minute}</h2>
-                <h2>{load} kW</h2>
-                <h2 style={{backgroundColor: (costOptimised ? "lightgreen" : "lightgrey")}}>{costOptimised ? "$" : ""}</h2>
+                <h2>{charging ? (dailyConsumption[currentHourRef.current] + chargerLoad).toFixed(2) : dailyConsumption[currentHourRef.current]} kW</h2>
+                <h2 style={{backgroundColor: (isCostOptimisedScheduled ? "lightgreen" : "lightgrey")}}>{isCostOptimisedScheduled ? "$" : ""}</h2>
+                <h2 style={{backgroundColor: (isLoadOptimisedScheduled ? "lightgreen" : "lightgrey")}}>{isLoadOptimisedScheduled ? "P" : ""}</h2>
                 <h2>{hour.toString().length == 2 ? hour : "0" + hour}:{minute.toString().length == 2 ? minute : "0" + minute}</h2>
 
             </div>
@@ -319,7 +376,8 @@ function App() {
                 Charge to 80%
             </button>
             <button onClick={handleAbortCharging}>Stop Charge</button>
-            <button onClick={handleScheduleChargingWhenLowestPrice}>Charge when lowest price</button>
+            <button onClick={handleScheduleChargingWhenLowestPrice} style={{backgroundColor: (isCostOptimisedScheduled ? "lightgreen" : "lightgrey")}}>Charge when lowest price</button>
+            <button onClick={handleScheduleChargingWhenLowestLoad} style={{backgroundColor: (isLoadOptimisedScheduled ? "lightgreen" : "lightgrey")}}>Charge when lowest load</button>
 
             <button onClick={handleDischarge}>Discharge</button>
             <br/>
@@ -327,7 +385,7 @@ function App() {
             <br/>
             <button onClick={handleGetPrice}>Get Price</button>
             <PriceChart data={price}/>
-            <button onClick={handleGetDailyConsumption}>Get daily consumption</button>
+            <button onClick={handleGetBaseLoad}>Get daily consumption</button>
             <ConsumptionChart data={dailyConsumption}/>
 
         </>
