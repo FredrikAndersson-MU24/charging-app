@@ -113,18 +113,20 @@ function App() {
             console.log(error);
         });
     }
-    const hourRef = useRef(hour);
+    const currentHourRef = useRef(hour);
     const chargeRef = useRef(charge);
-    const optRef = useRef(chargingHoursSorted);
-    const chargingRef = useRef(charging);
+    const optimalHourRef = useRef(chargingHoursSorted);
+    const isChargingRef = useRef(charging);
     const abortChargeRef = useRef(abortCharge);
+
+
     useEffect(() => {
-        hourRef.current = hour;
+        currentHourRef.current = hour;
         chargeRef.current = charge;
-        optRef.current = chargingHoursSorted;
-        chargingRef.current = charging;
+        optimalHourRef.current = chargingHoursSorted;
+        isChargingRef.current = charging;
         abortChargeRef.current = abortCharge;
-    }, [hour, charge, chargingHoursSorted, charging,abortCharge]);
+    }, [hour, charge, chargingHoursSorted, charging, abortCharge]);
 
 
     const checkChargeTo80PriceOptimised = (() => {
