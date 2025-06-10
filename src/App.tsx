@@ -28,6 +28,7 @@ function App() {
     const chargerLoad: number = 7.4;
     const maxLoad: number = 11;
     const [costOptimised, setCostOptimised] = useState<boolean>(false);
+    const [isLoadOptimisedScheduled, setIsLoadOptimisedScheduled] = useState<boolean>(false);
     const [abortCharge, setAbortCharge] = useState<boolean>(false);
     const [chargingHoursSorted, setChargingHoursSorted] = useState<Array<number>>([]);
     const pollingRate = 100;
