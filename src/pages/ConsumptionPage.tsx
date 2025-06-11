@@ -5,6 +5,7 @@ import ConsumptionChart from "../components/ConsumptionChart.tsx";
 import {
     Refresh
 } from "@mui/icons-material";
+import {Chip} from "@mui/material";
 
 function ConsumptionPage() {
 
@@ -29,7 +30,15 @@ function ConsumptionPage() {
         <>
             <div className={"chart-container"}>
                 <ConsumptionChart data={dailyConsumption}/>
-                <button onClick={handleGetBaseLoad} className={"refresh-button"}><Refresh/></button>
+                <Chip onClick={handleGetBaseLoad} icon={<Refresh/>} sx={{
+                    width: '2.4em',
+                    height: '2.4em',
+                    '& .MuiChip-icon': {
+                        alignSelf: 'center',
+                        justifySelf: 'center',
+                    }
+                }}
+                      className={"refresh-button"}/>
             </div>
         </>
     )
