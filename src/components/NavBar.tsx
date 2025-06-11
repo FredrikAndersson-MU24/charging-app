@@ -24,11 +24,23 @@ function NavBar() {
                 alignSelf: "center",
                 margin: "0",
                 backgroundColor: "#101a33",
-                boxShadow: "10px 10px -10px rgba(0, 0, 0, 0.8)",
+
             }}>
-            <BottomNavigationAction onClick={() => navigate("/")} label="Charging" icon={<EvStation/>}/>
-            <BottomNavigationAction  onClick={() => navigate("/price")} label="Price" icon={<Paid/>}/>
-            <BottomNavigationAction onClick={() => navigate("/consumption")} label="Consumption" icon={<ElectricMeter/>}/>
+            <BottomNavigationAction
+                onClick={() => navigate("/")}
+                label="Charging"
+                icon={<EvStation/>}
+                sx={{color: 'grey'}}/>
+            <BottomNavigationAction
+                onClick={() => navigate("/price")}
+                label="Price"
+                icon={<Paid/>}
+                sx={{color: 'grey'}}/>
+            <BottomNavigationAction
+                onClick={() => navigate("/consumption")}
+                label="Consumption"
+                icon={<ElectricMeter/>}
+                sx={{color: 'grey'}}/>
 
         </BottomNavigation>
     )
