@@ -3,6 +3,7 @@ import '../App.css'
 import api from "../api/charging-station.tsx";
 import PriceChart from "../components/PriceChart.tsx";
 import {Refresh} from "@mui/icons-material";
+import {Chip} from "@mui/material";
 
 function PricePage() {
     const [price, setPrice] = useState<Array<number>>([]);
@@ -26,7 +27,15 @@ function PricePage() {
         <>
         <div className={"chart-container"}>
             <PriceChart data={price}/>
-            <button onClick={handleGetPrice} className={"refresh-button"}><Refresh/></button>
+            <Chip onClick={handleGetPrice} icon={<Refresh/>} sx={{
+                width: '2.4em',
+                height: '2.4em',
+                '& .MuiChip-icon': {
+                    alignSelf: 'center',
+                    justifySelf: 'center',
+                }
+            }}
+                  className={"refresh-button"}/>
         </div>
 
         </>
