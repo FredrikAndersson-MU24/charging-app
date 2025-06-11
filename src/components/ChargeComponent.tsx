@@ -1,49 +1,68 @@
-import Chart from "react-apexcharts";
+import ReactApexChart from "react-apexcharts";
+import {useState} from "react";
+import type {ApexOptions} from "apexcharts";
 
-export default function ChargeComponent(props: { data: number, charging: boolean }) {
+const ChargeComponent = (props: { data: number, charging: boolean }) => {
     const charge = Number(props.data.toFixed(0));
     const series = [charge];
+/*    const [series, setSeries] = useState([charge]);*/
 
-    const options = {
+    const [options] = useState<ApexOptions>({
+        stroke: {
+            lineCap: 'round',
+
+        },
         plotOptions: {
             radialBar: {
                 endAngle: 135,
                 startAngle: -135,
                 hollow: {
                     margin: 0,
-                    size: '60%',
-                    background: "transparent",
+                    size: '55%',
+                    background: '#091124',
                     dropShadow: {
                         enabled: true,
-                        top: 5,
-                        left: 0,
+                        top: 4,
+                        left: 4,
                         blur: 4,
-                        opacity: 0.25
+                        opacity: 0.4
                     }
                 },
                 track: {
-                    background: "#f2f2f2",
+                    dropShadow: {
+                        enabled: true,
+                        top: 4,
+                        left: 4,
+                        blur: 4,
+                        opacity: 0.4
+                    }
                 },
                 dataLabels: {
                     name: {
                         show: true,
                         offsetY: -20,
                         fontSize: '1.6em',
-
+                        color: 'grey',
                     },
                     value: {
                         offsetY: 15,
-                        fontSize: '3em',
-                    }
-                }
-            }
+                        fontSize: '2.4em',
+                        color: 'grey',
+                    },
+                },
+            },
         },
         labels: ['Charge'],
-    };
+    });
 
     return (
         <>
-            <Chart options={options} series={series} type="radialBar"/>
+            <div style={{marginBottom: "1.6em"}}>
+                <ReactApexChart options={options} series={series} type="radialBar" />
+            </div>
+
         </>
     );
 }
+
+export default ChargeComponent
