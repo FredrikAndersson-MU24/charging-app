@@ -16,7 +16,7 @@ const Chips = (props: {
                 <Chip icon={<AccessTime/>} label={props.time} variant="outlined" className={"chips"} color="primary"/>
                 <Chip icon={<Bolt/>} label={props.power + "kW"} variant="outlined" className={"chips"} color="primary"/>
                 <Chip icon={<ElectricCarOutlined/>} color={props.charging ? "success" : "primary"}
-                      label={props.charge + "%"} variant={props.charging ? "filled" : "outlined"} className={"chips"}/>
+                      label={props.charge + "%"} variant={props.charging ? "outlined" : "outlined"} className={"chips"}/>
                 <Chip icon={<PriceCheck/>} sx={{
                     display: (props.isCostOptimisedScheduled ? "inline-block" : "none"),
                     width: '2.4em',
