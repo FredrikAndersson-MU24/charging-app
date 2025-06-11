@@ -1,7 +1,11 @@
 import '../App.css'
 import ChargeComponent from "../components/ChargeComponent.tsx";
-import {Accordion, AccordionDetails, AccordionSummary, Typography} from "@mui/material";
-import {ExpandMore} from '@mui/icons-material';
+import {Accordion, AccordionDetails, AccordionSummary, Chip, Typography} from "@mui/material";
+import {
+    Cancel,
+    EvStation,
+    ExpandMore
+} from '@mui/icons-material';
 
 const ChargingPage = (props: {
     charge: number,
@@ -22,16 +26,11 @@ const ChargingPage = (props: {
         <>
             <div className={"charge-container"}>
                 <ChargeComponent data={props.charge} charging={props.charging}/>
-                <div style={{display: "flex", justifyContent: "space-between"}}>
-                    <button onClick={props.handleChargeTo80}
-                            style={{backgroundColor: (props.charging ? "lightgreen" : "")}}
-                            className={"charging-button"}>
-                        Charge to 80%
-                    </button>
-                    <button onClick={props.handleAbortCharging}
-                            className={"charging-button"}>
-                        Stop Charge
-                    </button>
+                <div style={{display: "flex", justifyContent: "space-between", background: "rgba(255, 255, 255, 0.25)", alignItems: "center", borderRadius: "3em"}}>
+                    <Chip onClick={props.handleChargeTo80} icon={<EvStation/>} color={props.charging ? "success" : "primary"}
+                              label={"Charge to 80%"} variant={props.charging ? "filled" : "filled"} sx={{margin: "0.3em"}}/>
+                    <Chip onClick={props.handleAbortCharging} icon={<Cancel/>} color={props.charging ? "error" : "primary"}
+                          label={"Stop Charge"} variant={props.charging ? "filled" : "filled"} sx={{margin: "0.3em"}}/>
                 </div>
             </div>
 
