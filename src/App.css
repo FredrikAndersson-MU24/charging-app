@@ -19,7 +19,7 @@ body {
   position: relative;
   min-height: 100vh;
   margin:0;
-  background-color:#091124;
+  background-color: #091124;
 ;
 }
 
@@ -54,11 +54,11 @@ body {
 .chart-container {
   display: flex;
   flex-direction: column;
-  min-width: 345px;
+  min-width: 300px;
   max-width: 600px;
   margin: 16px;
   background-color: #14263e;
-  border-radius: 12px;
+  border-radius: 1em;
   box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.8);
   padding: 4px;
 }
@@ -66,24 +66,24 @@ body {
 .charge-container {
   display: flex;
   flex-direction: column;
-  min-width: 345px;
+  min-width: 300px;
   max-width: 600px;
   margin: 16px;
   background: linear-gradient(110deg, #37f1f0 0%, #477ec1 40%, #b152f9 80%);
   color: #fff;
-  border-radius: 12px;
+  border-radius: 1em;
   box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.8);
-  padding: 4px;
+  padding: 0.3em;
 }
 
 .schedule-container {
   display: flex;
   flex-direction: column;
-  min-width: 345px;
+  min-width: 300px;
   max-width: 600px;
   margin: 16px;
   background-color: #14263e;
-  border-radius: 12px;
+  border-radius: 1em;
   box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.8);
   padding: 4px;
 }
