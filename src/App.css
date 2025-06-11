@@ -1,11 +1,9 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 600;
-
   color-scheme: light dark;
-  color: black;
-  background-color: lightcyan;
   overflow-x: hidden;
+  color: black;
 }
 
 body {
@@ -19,8 +17,15 @@ body {
   position: relative;
   min-height: 100vh;
   margin:0;
-  background-color: #091124;
+  background: linear-gradient(110deg, #37f1f0 0%, #477ec1 40%, #b152f9 80%); /*background-color: #091124;*/
 ;
+}
+
+.accordion-details{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  row-gap: 0.3em;
 }
 
 .page-container {
@@ -57,7 +62,7 @@ body {
   min-width: 300px;
   max-width: 600px;
   margin: 16px;
-  background-color: #14263e;
+  background: rgba(255, 255, 255, 0.35);
   border-radius: 1em;
   box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.8);
   padding: 4px;
@@ -69,7 +74,7 @@ body {
   min-width: 300px;
   max-width: 600px;
   margin: 16px;
-  background: linear-gradient(110deg, #37f1f0 0%, #477ec1 40%, #b152f9 80%);
+  background: rgba(255, 255, 255, 0.35);
   color: #fff;
   border-radius: 1em;
   box-shadow: 4px 4px 20px rgba(0, 0, 0, 0.8);
