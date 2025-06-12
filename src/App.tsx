@@ -362,6 +362,7 @@ function App() {
                         <Route path="/" element={<ChargingPage
                             charge={charge}
                             charging={charging}
+                            optimalHours={chargingHoursSorted}
                             handleScheduleChargingWhenLowestLoad={handleScheduleChargingWhenLowestLoad}
                             isCostOptimisedScheduled={isCostOptimisedScheduled}
                             isLoadOptimisedScheduled={isLoadOptimisedScheduled}

@@ -13,9 +13,9 @@ const Chips = (props: {
     return (
         <>
             <div className="chips-container" style={{display: "flex", justifyContent: "start"}}>
-                <Chip icon={<AccessTime/>} label={props.time} variant="outlined" className={"chips"} color="primary"/>
-                <Chip icon={<Bolt/>} label={props.power + "kW"} variant="outlined" className={"chips"} color="primary"/>
-                <Chip icon={<ElectricCarOutlined/>} color={props.charging ? "success" : "primary"}
+                <Chip icon={<AccessTime/>} label={props.time} variant="outlined" className={"chips"} color="info"/>
+                <Chip icon={<Bolt/>} label={props.power + "kW"} variant="outlined" className={"chips"} color="info"/>
+                <Chip icon={<ElectricCarOutlined/>} color={props.charging ? "success" : "info"}
                       label={props.charge + "%"} variant={props.charging ? "outlined" : "outlined"} className={"chips"}/>
                 <Chip icon={<PriceCheck/>} sx={{
                     display: (props.isCostOptimisedScheduled ? "inline-block" : "none"),
@@ -25,7 +25,8 @@ const Chips = (props: {
                         alignSelf: 'center',
                         justifySelf: 'center',
                     }
-                }} color={"success"}/>
+                }} color={"success"}
+                      variant={"outlined"}/>
                 <Chip icon={<ElectricMeterOutlined/>} sx={{
                     display: (props.isLoadOptimisedScheduled ? "inline-block" : "none"),
                     width: '2.4em',
@@ -35,7 +36,8 @@ const Chips = (props: {
                         justifySelf: 'center',
                     }
                 }}
-                      color={"success"}/>
+                      color={"success"}
+                variant={"outlined"}/>
             </div>
         </>
 
