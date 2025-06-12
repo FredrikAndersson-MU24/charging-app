@@ -128,12 +128,12 @@ const ChargingPage = (props: {
                 position: "absolute",
                 backgroundColor: "rgba(255, 255, 255, 0.35)"
             }}>
-            <div style={{display: "flex", justifyContent: "space-between",backgroundColor: "#14263e", color: "white"}}>
-                <DialogTitle sx={{backgroundColor: "#14263e", color: "white"}}><Bolt/> Schedule charging </DialogTitle>
-                    <CancelOutlined sx={{backgroundColor: "#14263e", color: "white", padding: "0.1em"}} onClick={handleCloseDialog}/>
+            <div style={{display: "flex", justifyContent: "space-between",backgroundColor: "#14263e"}}>
+                <DialogTitle sx={{backgroundColor: "#14263e", color: "lightgrey"}}><Bolt/> Schedule charging </DialogTitle>
+                    <CancelOutlined sx={{backgroundColor: "#14263e", color: "lightgrey", padding: "0.1em"}} onClick={handleCloseDialog}/>
             </div>
 
-                <DialogContent sx={{backgroundColor: "#14263e", color: "white"}}>Choose your charging strategy.</DialogContent>
+                <DialogContent sx={{backgroundColor: "#14263e", color: "lightgrey"}}>Choose your charging strategy.</DialogContent>
                 <List sx={{backgroundColor: "#14263e", color: "white", display: "flex", flexDirection: "column", alignItems: "center", }}>
 
                     <ListItem sx={{display: "flex", flexDirection: "column", alignItems: "center", backgroundColor: "#14263e",}} >
